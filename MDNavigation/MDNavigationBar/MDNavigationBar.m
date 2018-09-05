@@ -7,9 +7,9 @@
 //
 
 #import "MDNavigationBar.h"
-#define MDNavigationBarDefaultBackgroundColor [UIColor whiteColor]
-#define MDNavigationBarScreenWidth [UIScreen mainScreen].bounds.size.width
-#define MHDNavigtionBarTop CGRectGetHeight([UIApplication sharedApplication].statusBarFrame)
+#define MDNavigationBarDefaultBackgroundColor   [UIColor whiteColor]
+#define MDNavigationBarScreenWidth              [UIScreen mainScreen].bounds.size.width
+#define MHDNavigtionBarTop                      CGRectGetHeight([UIApplication sharedApplication].statusBarFrame)
 #define leftMargin           5
 #define middleMargin         5
 #define rightMargin          5
@@ -47,6 +47,20 @@
     navigationBar.titleLabelFont = [UIFont fontWithName:@"PingFangTC-Semibold" size:18];
     navigationBar.titleLabelColor =  [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
     navigationBar.bottomLineView.backgroundColor = [UIColor colorWithRed:(CGFloat)(218.0/255.0) green:(CGFloat)(218.0/255.0) blue:(CGFloat)(218.0/255.0) alpha:1.0];
+    
+    
+    //默认添加，左中右，item
+    UIButton *leftBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [leftBtn setImage:[UIImage imageNamed:@"fanhui1"] forState:UIControlStateNormal];
+    navigationBar.leftItems = [NSMutableArray arrayWithObjects:leftBtn, nil];
+    
+    navigationBar.title = @"title";
+    
+    UIButton *rightBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [rightBtn setImage:[UIImage imageNamed:@"fanhui1"] forState:UIControlStateNormal];
+    navigationBar.rightItems = [NSMutableArray arrayWithObjects:rightBtn, nil];
+    
+    
     return navigationBar;
 }
 
@@ -89,9 +103,10 @@
     }
 }
 
-#pragma mark - add views
+#pragma mark - 添加左，中，右视图
 //更新左边底部视图frame,添加左边item
 -(void)addLeftViewItems{
+    //n个item，左边视图宽=n*(item宽+间距)+间距
     self.leftViewWidth = self.leftItems.count*(BTN_WIDTH+leftMargin)+leftMargin;
     self.leftView.frame = CGRectMake(0, MHDNavigtionBarTop, self.leftViewWidth, CONTENT_VIEW_HEIGHT);
     for (int i = 0 ; i< self.leftItems.count; i++) {
@@ -105,8 +120,10 @@
 }
 //更新中间底部视图frame，添加titlelabel
 -(void)addMiddleLabel{
-    if (self.middleViewWidth >= SCREEN_WIDTH/3*2) {
-        self.middleViewWidth = SCREEN_WIDTH/3*2;
+    
+    //title最大长度，不超过屏幕的三分之二
+    if (self.middleViewWidth >= MDNavigationBarScreenWidth/3*2) {
+        self.middleViewWidth = MDNavigationBarScreenWidth/3*2;
     }
     self.middleView.frame = CGRectMake((self.backgroundView.frame.size.width-self.middleViewWidth) / 2.0, MHDNavigtionBarTop, self.middleViewWidth, CONTENT_VIEW_HEIGHT);
     self.titleLabel.frame = CGRectMake(0, 0, self.middleViewWidth, self.middleView.frame.size.height);
@@ -123,6 +140,7 @@
 }
 //更新右边底部视图的frame，添加右边item
 -(void)addRightViewItems{
+    //n个item，右边视图宽=n*(item宽+间距)+间距
     self.rightViewWidth = self.rightItems.count*(BTN_WIDTH+rightMargin)+rightMargin;
     self.rightView.frame = CGRectMake(self.backgroundView.frame.size.width - self.rightViewWidth, MHDNavigtionBarTop, self.rightViewWidth, CONTENT_VIEW_HEIGHT);
     for (int i = 0; i<self.rightItems.count; i++) {
@@ -145,27 +163,49 @@
     }
 }
 
-#pragma mark - setter
+#pragma mark - 设置颜色，图片
 -(void)setBackgroundColor:(UIColor *)backgroundColor{
-    _backgroundColor = backgroundColor;
     self.backgroundImageView.hidden = YES;
     self.backgroundView.hidden = NO;
-    self.backgroundView.backgroundColor = _backgroundColor;
+    self.backgroundView.backgroundColor = backgroundColor;
 }
 
 -(void)setBackgroundImageName:(NSString *)backgroundImageName{
-    _backgroundImageName = backgroundImageName;
     self.backgroundImageView.hidden = NO;
-    self.backgroundImageView.image = [UIImage imageNamed:_backgroundImageName];
+    self.backgroundImageView.image = [UIImage imageNamed:backgroundImageName];
+}
+//
+-(void)setBackAlpha:(CGFloat)backAlpha onlyBack:(BOOL)yes{
+    if (yes) {
+        self.backgroundView.alpha = backAlpha;
+        self.backgroundImageView.alpha = backAlpha;
+        self.bottomLineView.alpha = backAlpha;
+    }else {
+        [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            obj.alpha = backAlpha;
+        }];
+    }
+    
+
+}
+-(void)setNavTintColor:(UIColor *)color{
+    [self.leftView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[UIButton class]]) {
+            UIButton *btn = (UIButton *)obj;
+            [btn setTitleColor:color forState:UIControlStateNormal];
+        }
+    }];
+    [self.rightView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[UIButton class]]) {
+            UIButton *btn = (UIButton *)obj;
+            [btn setTitleColor:color forState:UIControlStateNormal];
+        }
+    }];
+    
+    self.titleLabel.textColor = color;
 }
 
--(void)setBackAlpha:(CGFloat)backAlpha{
-    _backAlpha = backAlpha;
-    self.backgroundView.alpha = _backAlpha;
-    self.backgroundImageView.alpha = _backAlpha;
-    self.bottomLineView.alpha = _backAlpha;
-}
-
+#pragma mark - 设置item
 -(void)setLeftItems:(NSMutableArray *)leftItems{
     _leftItems = leftItems;
     [self.leftView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -208,8 +248,10 @@
 }
 
 -(void)setLineColor:(UIColor *)lineColor{
-    _lineColor = lineColor;
-    self.bottomLineView.backgroundColor = _lineColor;
+    self.bottomLineView.backgroundColor = lineColor;
+}
+-(void)setLineHidden:(BOOL)hidden{
+    self.bottomLineView.hidden = hidden;
 }
 
 -(void)setNavigationStyle:(MDNavigationBarStyle)navigationStyle{
@@ -341,12 +383,52 @@
         weakSelf.transform = CGAffineTransformMakeTranslation(0, y);
     }];
 }
--(void)setItemFrame:(int)position frame:(CGRect)frame{
-    if (position == 1) {
-        self.rightView.frame = CGRectMake(frame.origin.x, MHDNavigtionBarTop + frame.origin.y, frame.size.width, frame.size.height);
-        UIButton *btn = [self.rightView viewWithTag:523];
-        CGRect tmpFrame = btn.frame;
-        btn.frame = CGRectMake(0,tmpFrame.origin.y,frame.size.width, frame.size.height);
+
+//根据tag设置item
+-(void)setItemWithTag:(int)tag image:(NSString *)imageName edgInset:(UIEdgeInsets)edgInset state:(UIControlState)state{
+    if (tag < 523) {
+        UIButton *btn = (UIButton *)[self.leftView viewWithTag:tag];
+        [btn setImage:[UIImage imageNamed:imageName] forState:state];
+        [btn setImageEdgeInsets:edgInset];
+        [self setBtn:btn title:@"" titleColor:nil backgroundColor:[UIColor clearColor] font:nil radius:0 state:state];
+
+    }else{
+        UIButton *btn = (UIButton *)[self.rightView viewWithTag:tag];
+        [btn setImage:[UIImage imageNamed:imageName] forState:state];
+        [btn setImageEdgeInsets:edgInset];
+        [self setBtn:btn title:@"" titleColor:nil backgroundColor:[UIColor clearColor] font:nil radius:0 state:state];
+
     }
+}
+-(void)setItemWithTag:(int)tag title:(NSString *)title titleColor:(UIColor *)color backgroundColor:(UIColor *)backgroundColor font:(UIFont *)font radius:(CGFloat)radius state:(UIControlState)state{
+    if (tag < 523) {
+        UIButton *btn = (UIButton *)[self.leftView viewWithTag:tag];
+        [self setBtn:btn title:title titleColor:color backgroundColor:backgroundColor font:font radius:radius state:state];
+    }else{
+        UIButton *btn = (UIButton *)[self.rightView viewWithTag:tag];
+        [self setBtn:btn title:title titleColor:color backgroundColor:backgroundColor font:font radius:radius state:state];
+    }
+}
+-(void)setBtn:(UIButton *)btn title:(NSString *)title titleColor:(UIColor *)color backgroundColor:(UIColor *)backgroundColor font:(UIFont *)font radius:(CGFloat )radius state:(UIControlState)state{
+    [btn setTitle:title forState:state];
+    [btn setTitleColor:color forState:state];
+    [btn setBackgroundImage:[self imageWithColor:backgroundColor] forState:state];
+    btn.layer.cornerRadius = radius;
+    btn.layer.masksToBounds = YES;
+    btn.titleLabel.font = font;
+}
+//根据颜色返回图片
+- (UIImage *)imageWithColor:(UIColor *)color {
+    CGRect rect = CGRectMake(0.0f, 0.0f, 1.0f, 1.0f);
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextSetFillColorWithColor(context, [color CGColor]);
+    CGContextFillRect(context, rect);
+    
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return image;
 }
 @end

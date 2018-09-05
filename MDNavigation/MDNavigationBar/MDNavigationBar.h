@@ -7,10 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-#define SCREEN_WIDTH            [UIScreen mainScreen].bounds.size.width
-#define SCREEN_HEIGHT           [UIScreen mainScreen].bounds.size.height
-    
+ 
 #define Is_iPhone_X             [UIScreen mainScreen].bounds.size.height == 812 ? YES : NO
 #define MDNavigationHeight      ([UIScreen mainScreen].bounds.size.height == 812 ? 88 : 64)
 
@@ -45,16 +42,10 @@ typedef NS_ENUM(NSInteger,MDNavigationBarItemPosition){
 @property (nonatomic, strong) UIColor                           *titleLabelColor;
 @property (nonatomic, strong) UIFont                            *titleLabelFont;
 @property (nonatomic, strong) NSAttributedString                *titleLabelAttribute;
-//背景图片，颜色,透明度
-@property (nonatomic, strong) UIColor                           *backgroundColor;
-@property (nonatomic, strong) NSString                          *backgroundImageName;
-@property (nonatomic, strong) UIColor                           *lineColor;
-@property (nonatomic, assign) CGFloat                           backAlpha;
 //左右item和中间的自定义视图
 @property (nonatomic, copy)   NSMutableArray                    *leftItems;
 @property (nonatomic, copy)   NSMutableArray                    *rightItems;
 @property (nonatomic, strong) UIView                            *headerView;
-
 //排版类型
 @property (nonatomic, assign) MDNavigationBarStyle              navigationStyle;
 //处理事件，block回调
@@ -62,12 +53,26 @@ typedef NS_ENUM(NSInteger,MDNavigationBarItemPosition){
 //处理事件，代理
 @property (nonatomic, assign) id<MDNavigationBarDelegate>       navigationBarDelegate;
 
+//设置背景颜色
+-(void)setBackgroundColor:(UIColor *)backgroundColor;
+//设置背景图片
+-(void)setBackgroundImageName:(NSString *)backgroundImageName;
+//设置透明度,所有控件，或者只设置背景
+-(void)setBackAlpha:(CGFloat)backAlpha onlyBack:(BOOL)yes;
+//设置导航栏上按钮的颜色
+-(void)setNavTintColor:(UIColor *)color; 
+//设置线条颜色
+-(void)setLineColor:(UIColor *)lineColor;
+//设置线条是否隐藏
+-(void)setLineHidden:(BOOL)hidden;
+
 //创建导航栏
 +(instancetype)mdNavigationBar;
 //可以动态添加item
 -(void)addItemWithPosition:(MDNavigationBarItemPosition )position item:(UIButton *)item;
 //Y方向偏移
 -(void)transitionY:(CGFloat)y;
-//设置导航栏itemframe,0：左，1：右
--(void)setItemFrame:(int)position frame:(CGRect )frame;
+//设置导航栏itemframe
+-(void)setItemWithTag:(int)tag title:(NSString *)title titleColor:(UIColor *)color backgroundColor:(UIColor *)backgroundColor font:(UIFont *)font radius:(CGFloat )radius state:(UIControlState )state;
+-(void)setItemWithTag:(int)tag image:(NSString *)imageName edgInset:(UIEdgeInsets)edgInset state:(UIControlState)state;
 @end
